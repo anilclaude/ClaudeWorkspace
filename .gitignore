@@ -1,0 +1,11 @@
+# platform/ is its own git repository (product code, versioned separately
+# from this scaffold/process repo). Excluded here so it isn't swallowed as a
+# broken nested-repo entry.
+platform/
+
+# Machine-local permission grants — not meant to be shared or committed.
+.claude/settings.local.json
+
+node_modules/
+*.log
+.DS_Store
