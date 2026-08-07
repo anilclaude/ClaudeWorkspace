@@ -3,12 +3,13 @@
 Reference documents for the workspace. Read by humans, not by agents.
 
 Operational documents live elsewhere and are read at build time:
-`scaffold/policies/agent-policies.md`, `scaffold/inputs/*`, and each service's
-own `docs/prd/` and `docs/wireframes/`.
+`scaffold/policies/agent-policies.md`, `scaffold/inputs/*`, and `platform/docs/`
+(PRDs and wireframes — platform-level, not scoped to any one service or app,
+since a single PRD routinely produces tasks in more than one of them).
 
 | Document | What it is |
 |---|---|
-| `BaseWorkspace_Agent_Policies_Lite` | **Current.** The 22 policies across 3 agents, permissions matrix, Definition of Done, graduation triggers. The `.md` twin of `scaffold/policies/agent-policies.md`. |
+| `BaseWorkspace_Agent_Policies_Lite` | **Current.** The 26 policies across 3 agents, permissions matrix, Definition of Done, graduation triggers. The `.md` twin of `scaffold/policies/agent-policies.md`. |
 | `BaseWorkspace_Structure_Lite` | **Current.** Prerequisites, the services structure, PRD and wireframe minimum shapes, module boundaries, starting a new project. |
 | `BaseWorkspace_Agent_Policies_v1` | Reference. The full-scale design — 6 agents, 86 policies, 15-stage pipeline. What to grow into, not what is built. |
 | `BaseWorkspace_Structure_v1` | Reference. The full-scale stack-agnostic generator design: two input files, template resolution, `/new-app`. Aspirational. |

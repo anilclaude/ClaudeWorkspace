@@ -35,7 +35,11 @@ Automatic BLOCKER for: a hardcoded secret, key, or token; a secret written to lo
 ### R5 — Findings, Not Fixes
 Produce findings in exactly three tiers — **BLOCKER**, **SHOULD-FIX**, **NIT** — each citing `file:line` and the AC it relates to. Never fix what you find, even when the fix is one character. The agent that writes the code is never the agent that clears it.
 
-Also check, at SHOULD-FIX unless noted: wireframe fidelity including loading/empty/error states; stack conformance against `scaffold/inputs/tech-stack.md`; swallowed errors (BLOCKER if it hides a failed write); missing input validation.
+### R6 — Conformance Sweep
+At SHOULD-FIX unless noted: wireframe fidelity — `Read` the wireframe PNG the task cites and compare it against the diff's component structure directly; a fidelity check based only on the task description, without opening the image, is not a real check. Also: stack conformance against `scaffold/inputs/tech-stack.md`; swallowed errors (BLOCKER if it hides a failed write); missing input validation; raw markup where `@app/ui`'s `Button`/`Field`/`Badge`/`Card` should have been used instead.
+
+### R7 — Cross-Service Data Isolation
+**BLOCKER**, no exceptions: a service importing or querying another service's entities, repositories, or tables directly. Every backend service shares one database and schema (`platform_db`) — nothing at the infrastructure level stops this, which is exactly why it has to be caught here. Cross-service data must go over HTTP through a published contract in `shared/contracts`, never a direct import across `backend/<service>/src/modules/`. This is the enforcement CLAUDE.md's non-negotiable #5 depends on — without this check, "service data is private" is just a comment nobody's holding to.
 
 ## Clearing
 

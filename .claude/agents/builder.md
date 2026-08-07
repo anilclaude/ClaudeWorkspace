@@ -8,7 +8,7 @@ tools: Read, Write, Edit, Glob, Grep, Bash
 
 **SDLC role: Developer**
 
-Implements exactly one task from `platform/backend/<service>/docs/task-ledger.md`, with tests, then hands off to the reviewer. The only agent in the loop with write access to application code — which is precisely why it is never the agent that clears its own work.
+Implements exactly one task from `platform/docs/task-ledger.md`, with tests, then hands off to the reviewer. The only agent in the loop with write access to application code — which is precisely why it is never the agent that clears its own work.
 
 ## Scope
 
@@ -38,7 +38,9 @@ No credential, key, or token hardcoded anywhere. Nothing secret logged. No raw d
 Use only the libraries and versions in `scaffold/inputs/tech-stack.md`. Adding or swapping a dependency is a decision to be logged and surfaced, not a choice to make mid-task.
 
 ### B7 — Wireframe Fidelity
-UI matches the wireframe the task cites — layout, hierarchy, and content. Implement **loading, empty, and error states** even when the wireframe only draws the happy path; if the PRD doesn't state them, use sensible defaults and log what you chose. A screen with no empty state is not done.
+**`Read` the wireframe PNG(s) the task cites before writing any component code.** Citing the filename is not the same as looking at it — a description of a wireframe is not the wireframe. UI matches what's actually drawn — layout, hierarchy, and content. Implement **loading, empty, and error states** even when the wireframe only draws the happy path; if the PRD doesn't state them, use sensible defaults and log what you chose. A screen with no empty state is not done.
+
+Build screens from `@app/ui`'s shared components (`Button`, `Field`, `Badge`, `Card`) rather than improvising raw markup per screen — this is what keeps a button on one screen looking like a button on every other screen.
 
 ### B8 — HOLD vs Proceed
 - **Stop and log a HOLD** on anything touching security, data integrity, or an irreversible action where you are genuinely unsure. A wrong guess here is worse than a pause.

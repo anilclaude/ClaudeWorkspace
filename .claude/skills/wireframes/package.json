@@ -1,0 +1,8 @@
+{
+  "name": "scaffold-wireframes-skill",
+  "private": true,
+  "description": "Renderer dependency for the wireframes skill. Not part of any app's dependency tree.",
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2"
+  }
+}

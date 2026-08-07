@@ -5,25 +5,38 @@ Two directories, cleanly separated:
 | Directory | Holds | Changes when |
 |---|---|---|
 | [`scaffold/`](scaffold/README.md) | Process — inputs, policies, memory, templates | The *process* improves |
-| [`platform/`](platform/) | Product — services, web app, packages, infra | The *product* changes |
+| [`platform/`](platform/) | Product — backend services, frontend apps, shared libs, infra | The *product* changes |
 
 **Read [`scaffold/memory/STATE.md`](scaffold/memory/STATE.md) first.** It says
 where the build is right now.
 
 ## Architecture
 
-Right-sized services in a monorepo. NestJS services each owning their database
-exclusively, one Next.js web app reaching them through BFF route handlers, and a
-`contracts` package that is the single source of truth for every cross-boundary
-type. No message broker, no gateway — added when a real use case appears.
+Right-sized services in a monorepo. NestJS services, one Next.js web app
+calling them directly from the browser (CORS-enabled, no BFF layer), and a
+`contracts` package that is the single source of truth for every
+cross-boundary type. No message broker, no gateway — added when a real use
+case appears.
+
+Every backend service shares one database and schema (`platform_db`) — data
+privacy between services is a code-review convention (see Non-negotiable #5
+below), not an infrastructure guarantee. Each service's migration history is
+still isolated: its own `<service>_migrations` table, never the shared default.
 
 ```
 platform/
-├── backend/auth/          NestJS · db auth_db · :4001
-├── backend/core/          NestJS · db core_db · :4002
-├── frontend/web/          Next.js · :3001 · BFF route handlers
-└── packages/{shared,backend,frontend}/
+├── docs/                  PRDs, wireframes, task ledger — module-wise, not
+│                          scoped to one service or app (see below)
+├── backend/auth/          NestJS · :4001
+├── backend/core/          NestJS · :4002
+├── backend/libs/          libraries backend services may import
+├── frontend/web/          Next.js · :3001 · calls services directly (CORS)
+├── frontend/libs/         libraries frontend apps may import
+└── shared/                importable by both — contracts, common
 ```
+
+PRDs live at `platform/docs/`, not inside any one service or app — a single PRD
+routinely produces tasks in more than one of them.
 
 Module-wise inside every service and app: `src/modules/<module>/`. Routing files
 import from modules and hold no logic. Only `*.service.ts` touches the database.
@@ -45,7 +58,7 @@ PRD → /plan → /build (implement → review → rework) → /commit → /wrap
 
 | Command | Does |
 |---|---|
-| `/plan <service>` | PRD + wireframes → ordered, AC-bound tasks + feature branch |
+| `/plan` | PRD + wireframes → ordered, AC-bound tasks + feature branch |
 | `/build` | Implement one task with tests, review it, rework until clear |
 | `/commit` | Commit to the feature branch — only when every gate is green |
 | `/wrap` | Refresh `STATE.md`, ship finished PRDs, record decisions |
@@ -56,11 +69,17 @@ Full policies in [`scaffold/policies/agent-policies.md`](scaffold/policies/agent
 ## Gate commands — run from `platform/`
 
 ```bash
-cd platform && pnpm build && pnpm typecheck && pnpm lint && pnpm test
+cd platform && pnpm build && pnpm typecheck && pnpm lint && pnpm test   # no Docker needed
+pnpm test:int                                                          # needs pnpm db:up
 ```
 
-All four pass on the current tree. They run through Turborepo, so `packages/*`
-builds before the services and app that consume it.
+First run, ports, and the migration workflow: [`platform/README.md`](platform/README.md).
+
+All five pass on the current tree. The first four run through Turborepo, so
+`shared/*`, `backend/libs/*`, and `frontend/libs/*` build before the services
+and apps that consume them. `test:int` requires a running database and is
+excluded from that build order — see `platform/README.md`'s Integration tests
+section for why it's a separate gate rather than folded into `test`.
 
 ## Non-negotiables
 
@@ -68,10 +87,15 @@ builds before the services and app that consume it.
 2. **BLOCKER is non-waivable** — no override, no deferral, by anyone.
 3. **Rework cap of 3** — then stop and escalate with both positions stated.
 4. **Human owns the default branch** — push, PR, and merge are always yours.
-5. **Service data is private** — no service reads another's tables. Cross-service
-   data goes over HTTP through a published contract.
+5. **Service data is private — by convention, not infrastructure.** Every
+   backend service shares one database and schema, so nothing physically stops
+   a service from querying another's tables. It still must not: cross-service
+   data goes over HTTP through a published contract, and the reviewer checks
+   for a direct import of another service's entities/repositories as a
+   BLOCKER, since that's now possible where it used to be structurally
+   impossible.
 6. **Contracts before implementation** — a cross-boundary type is added to
-   `packages/shared/contracts` first, then implemented against.
+   `shared/contracts` first, then implemented against.
 
 ## Definition of Done
 
