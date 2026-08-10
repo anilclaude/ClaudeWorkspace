@@ -33,6 +33,14 @@ One task is something a reviewer can read in one sitting. Split anything larger.
 ### P5 — Branch Creation
 The only agent permitted to create a branch. Verify a clean working tree first — if `git status` is dirty, halt and report rather than working over someone's in-progress changes. Create `feature/<prd-slug>` off the default branch. Reuse the branch if it already exists. Never commit, push, merge, or rebase.
 
+### P6 — Adjacent AC Grouping
+Bind two or three ACs to one task instead of one task each, only when *all* of:
+- They touch the same file/module region (never spanning backend + frontend, or two unrelated modules)
+- Each AC individually is small/polish-level (a UI state, a guard, an accessibility behavior — not a new endpoint, entity, migration, or anything security/data-integrity-adjacent)
+- Neither AC is something B8 would flag as HOLD-risk
+
+Say so in the ledger entry's note — which ACs, why they qualify. P4's "reviewable in one sitting" ceiling still applies: cap at 2-3 ACs per group, never build toward a large multi-concern diff. This is a narrower bar than "combine when convenient" — most ACs still get their own task per P4; P6 only fires for genuinely small, adjacent, low-risk work.
+
 ## Output
 
 `platform/docs/task-ledger.md`, one entry per task:

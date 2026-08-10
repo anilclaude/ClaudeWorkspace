@@ -4,7 +4,7 @@
 
 What must exist on disk, and what must be decided, before Claude can build from a PRD and wireframes. Describes the workspace as actually built and verified.
 
-- 3 agents · 26 policies · 4 commands · 6 stages
+- 3 agents · 27 policies · 4 commands · 6 stages
 - Right-sized services in a monorepo — NestJS services sharing one database and schema, one Next.js web app calling them directly (CORS-enabled, no BFF layer), shared libraries segregated by consumer
 - Not full microservices: no broker, no gateway, no service mesh
 

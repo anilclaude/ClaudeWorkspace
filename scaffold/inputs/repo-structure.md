@@ -43,7 +43,8 @@ ClaudeWorkspace/
     │                                    service or app (see below)
     │   ├── prd/{_ACTIVE,_SHIPPED}/
     │   ├── wireframes/<feature>/{index.md,*.png}
-    │   └── task-ledger.md
+    │   ├── task-ledger.md              ← state: what's ready/in-review/done
+    │   └── build-trace.md              ← timing: append-only, id+title+step+timestamp
     │
     ├── backend/                       ← everything backend-related
     │   ├── auth/                      app · NestJS · :4001

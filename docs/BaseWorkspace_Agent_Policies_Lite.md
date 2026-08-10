@@ -7,13 +7,13 @@ The reduced policy set for single-app projects built from a PRD and wireframes, 
 What survives is the correctness machinery, and it is small: build what the AC says, test it for real, never let the writer clear their own work, never destroy the git tree, never leak secrets.
 
 - 3 agents — planner, builder, reviewer
-- 20 agent policies + 6 cross-cutting = 26 total
+- 21 agent policies + 6 cross-cutting = 27 total
 - 4 commands — `/plan`, `/build`, `/commit`, `/wrap`
 - Prerequisites and structure: see `BaseWorkspace_Structure_Lite`
 
-_Supersedes Lite v1: B7 now requires actually reading the wireframe image before writing code (not just citing it), builds from `@app/ui`’s shared components, and the reviewer gets a matching check (R6) plus `/build` gained a screenshot-comparison step. Cross-cutting gained X5/X6 — service-data privacy and contracts-before-implementation — which were already live in `CLAUDE.md`’s non-negotiables but had never been added here. Backend services then moved to one shared database and schema (`platform_db`) instead of one database per service — X5’s guarantee stopped being physical, so the new R7 makes it a review-time BLOCKER instead._
+_Supersedes Lite v1: B7 now requires actually reading the wireframe image before writing code (not just citing it), builds from `@app/ui`’s shared components, and the reviewer gets a matching check (R6) plus `/build` gained a screenshot-comparison step. Cross-cutting gained X5/X6 — service-data privacy and contracts-before-implementation — which were already live in `CLAUDE.md`’s non-negotiables but had never been added here. Backend services then moved to one shared database and schema (`platform_db`) instead of one database per service — X5’s guarantee stopped being physical, so the new R7 makes it a review-time BLOCKER instead. The planner then gained P6 — a narrow, opt-in exception to P4’s one-task-per-AC default, for genuinely small/adjacent/low-risk ACs, to cut down on fixed per-task overhead (context read, policy read, gate run, live-verification restart) that’s paid once per task regardless of how small the change is._
 
-## 1. Planner — 5 policies
+## 1. Planner — 6 policies
 
 _SDLC role: Lead / Architect. Turns a PRD and its wireframes into ordered, AC-bound tasks._
 
@@ -24,6 +24,7 @@ _SDLC role: Lead / Architect. Turns a PRD and its wireframes into ordered, AC-bo
 | P3 | AC Coverage | Every acceptance criterion maps to at least one task. An unmapped AC halts planning — report the orphans rather than quietly dropping them. | Critical |
 | P4 | Task Sizing | One task is reviewable in one sitting. Split anything larger. Prefer one task per AC; combine only when two ACs are genuinely inseparable, and say so. | Medium |
 | P5 | Branch Creation | The only agent permitted to create a branch. Verify a clean working tree first and halt if dirty. Create feature/<prd-slug>, reuse if it exists. Never commit, push, merge, or rebase. | High |
+| P6 | Adjacent AC Grouping | Bind 2-3 ACs to one task only when all of: same file/module region, each AC individually small/polish-level (not a new endpoint, entity, migration, or security/data-integrity work), neither AC is B8 HOLD-risk. Say why in the ledger note. Narrower than "combine when convenient" — most ACs still get their own task; P4’s reviewable-in-one-sitting ceiling still caps group size. | Medium |
 
 ## 2. Builder — 8 policies
 

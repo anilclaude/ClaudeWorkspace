@@ -2,7 +2,7 @@
 
 Everything about **how** work gets done. No product code lives here, ever.
 
-**3 agents · 26 policies · 4 commands · 6 stages.** Sized for a small team with
+**3 agents · 27 policies · 4 commands · 6 stages.** Sized for a small team with
 one person driving a build at a time.
 
 | Folder | Holds |

@@ -35,6 +35,17 @@ The browser calls each backend service directly, using `NEXT_PUBLIC_*` service
 URLs and contract-validated clients from `@app/frontend-core`. CORS on each
 service (`CORS_ORIGIN`) is what makes this work — see `repo-structure.md`.
 
+**Tailwind `@source` per consuming app.** Tailwind v4 only auto-detects
+utility classes used inside a CSS file's *own* directory tree. Any workspace
+package that ships components consumed for their Tailwind classes by an app
+(today: `frontend/libs/ui` consumed by `frontend/web`) needs an explicit
+`@source '<path-to-package-src>';` line in that consumer's `globals.css`, or
+classes used only inside the package's components are silently dropped from
+the compiled CSS with no build error (see `scaffold/memory/DECISIONS.md`,
+"T05 (scaffold bug)"). Easy to forget if a second UI-shipping package, or a
+second Tailwind-using consumer app, is ever added — check for this
+explicitly at that point.
+
 ## Backend services — `backend/auth/` :4001 · `backend/core/` :4002
 
 | Layer | Choice | Range | Installed |

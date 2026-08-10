@@ -22,6 +22,8 @@ Implement the bound acceptance criteria — nothing speculative added, nothing r
 ### B2 — Test Per AC
 At least one test per bound AC, written **alongside** the implementation, not after the reviewer asks. Each test names the AC it exercises.
 
+**Testing a duplicate-invocation guard** (double-click/double-submit protection, or any code whose job is to reject a second call while the first is still in flight): dispatch both invocations in the same tick with raw events (e.g. two `dispatchEvent` calls before an `await act()` flush), not two separate `fireEvent`/`act()` calls. `fireEvent` wraps each call in its own `act()`, which flushes React state between the two dispatches — that hides the exact race the guard exists to prevent, so a test written this way can pass green against a guard that is broken live (T09 shipped this way once: a `useState`-based guard read as working under `fireEvent` but let two real requests through under a real same-tick double-click, only caught by live verification).
+
 ### B3 — No Test Suppression
 Never delete, skip, disable, or weaken a test to make a run pass. Never edit an assertion to match output the code happens to produce. If a test fails, either the code is wrong or the test is wrong — decide which, and say which. Silently making red go green is the single most damaging thing this agent can do.
 
@@ -49,3 +51,20 @@ Build screens from `@app/ui`'s shared components (`Button`, `Field`, `Badge`, `C
 ## Handoff
 
 A diff on the feature branch, uncommitted, containing the implementation and its tests, with `build`, `typecheck`, `lint`, and `test` all run locally and passing. Set the task's `status: in_review` in the ledger. Nothing is committed — the diff sits in the working tree for the reviewer.
+
+**Gate scope:** run gates scoped to the package(s) this task actually touched — `pnpm --filter <package> build/typecheck/lint/test` — not the full monorepo command. `/commit` re-runs the full four-gate suite as its own precondition regardless, so nothing is lost by scoping here; running the full command on every task is redundant, not extra safety. Scope to more than one package only if the task itself touched more than one (e.g. a contract change plus the service consuming it).
+
+## Trace logging
+
+Append a row to `platform/docs/build-trace.md` (table format already in that file — task id, task title, step, detail) at each of these points. Never edit or remove an existing row — this file is append-only.
+
+**Mechanical timestamp rule, no exceptions:** immediately before appending a row (or a batch of rows, see below), run `date -u +"%Y-%m-%dT%H:%M:%SZ"` as its own `Bash` tool call, and copy that exact stdout into the row(s). Never type a timestamp from memory, pattern-match one from a prior row, or estimate elapsed time — that is what produced wrong, out-of-order data in earlier tasks (T01/T02) before this rule existed. If you catch yourself about to write a timestamp without having just run `date` for it, stop and run `date` first.
+
+- **On picking up a task** (before reading anything): `builder:start`, detail empty.
+- **After reading the task's AC and wireframe (if any)**, before writing code: `builder:context_read`, detail empty.
+- **`builder:file_written` for each file's implementation (application code only, not tests)** — but **batch the write**: keep implementing files back-to-back without stopping to log each one individually; once you reach a natural pause (test-writing, or the end of implementation), run `date` **once** and append **all** `file_written` rows for the files finished since the last log point in a single `Edit` call, each with that same timestamp and its own file path in `detail`. Only split into a second `date`+`Edit` pair if real time clearly passed between files (e.g. you stopped to investigate something) — don't manufacture false precision by timestamping files individually when they finished within the same short burst; T03 already showed 4 files logged at the identical second, so individual timestamps often carry no extra signal anyway.
+- **When all tests for the task are written**: `builder:tests_written`, detail empty.
+- **Right before running `build`/`typecheck`/`lint`/`test`**: `builder:gates_start`, detail empty.
+- **Once all four gates pass**: `builder:gates_passed`, detail empty. Log this once, when the gates are actually green — not once per fix attempt.
+- **On completing a task**, right before handing off to the reviewer: `builder:submit_for_review`, detail empty.
+- **After a rework pass** (addressing reviewer findings), before handing back: `builder:rework_complete`, detail empty. Files touched during rework get their own `builder:file_written` row(s) too (same batching rule), so rework time-per-file is visible.

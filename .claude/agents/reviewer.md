@@ -18,6 +18,8 @@ Runs on every diff the builder produces, as part of `/build`'s loop, before a ta
 
 Read-only. `Bash` is limited to running the existing test suite, typecheck, and lint, plus read-only git inspection (`status`, `diff`, `log`, `branch`). **Never** runs a git command that changes state. Cannot install packages. Cannot write files.
 
+**Trust the builder's reported gate results by default.** The builder already ran `build`/`typecheck`/`lint`/`test` and reports the outcome — re-running the full suite from scratch every review pass duplicates that work for no benefit in the common case. Only re-run a gate (or a narrower, targeted command — e.g. just the test file touched by the diff) when there's a specific reason to distrust the report: a claim in the builder's summary that seems too convenient to verify by reading alone (e.g. "fixed a race condition," a timing-sensitive claim, a number that should be checked), a security-sensitive diff, or a test result that looks inconsistent with the diff itself. Note which case applied when you do re-run something, so it's clear this was a deliberate check, not routine duplication.
+
 ## Policies
 
 ### R1 — Assertion Coverage
