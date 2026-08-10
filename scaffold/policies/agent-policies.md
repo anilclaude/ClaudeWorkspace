@@ -23,7 +23,7 @@ _SDLC role: Lead / Architect. Turns a PRD and its wireframes into ordered, AC-bo
 | P2 | Wireframe Binding | Every UI task cites the wireframe file it implements, taken from that feature’s index.md. A UI task with no wireframe reference is a stop. A PRD screen with no wireframe is reported and halts planning. | High |
 | P3 | AC Coverage | Every acceptance criterion maps to at least one task. An unmapped AC halts planning — report the orphans rather than quietly dropping them. | Critical |
 | P4 | Task Sizing | One task is reviewable in one sitting. Split anything larger. Prefer one task per AC; combine only when two ACs are genuinely inseparable, and say so. | Medium |
-| P5 | Branch Creation | The only agent permitted to create a branch. Verify a clean working tree first and halt if dirty. Create feature/<prd-slug>, reuse if it exists. Never commit, push, merge, or rebase. | High |
+| P5 | Clean Tree Gate | Verify a clean working tree on master before writing anything, and halt if dirty. No branch is created — planning and building both happen directly on master (single local machine, no remote). Never commit, push, merge, or rebase. | High |
 | P6 | Adjacent AC Grouping | Bind 2-3 ACs to one task only when all of: same file/module region, each AC individually small/polish-level (not a new endpoint, entity, migration, or security/data-integrity work), neither AC is B8 HOLD-risk. Say why in the ledger note. Narrower than "combine when convenient" — most ACs still get their own task; P4's reviewable-in-one-sitting ceiling still caps group size. | Medium |
 
 ## 2. Builder — 8 policies
@@ -62,7 +62,7 @@ _SDLC role: Lead (review). Adversarial and read-only._
 | X1 | Separation of Powers | The agent that writes code never clears it. This is the one rule that cannot be dropped at any scale — remove it and every other policy becomes advisory. | Critical |
 | X2 | BLOCKER Non-Waivable | A BLOCKER cannot be downgraded, deferred, or overridden by any agent or command. Only its resolution clears it. | Critical |
 | X3 | Rework Cap | Three review cycles on one task, then stop and escalate to the human with both positions stated. Never force a pass to end the loop, and never loop indefinitely. | High |
-| X4 | Human Owns the Default Branch | Push, pull request, and merge are always yours. /commit reaches the feature branch only, and only when every gate is green. | Critical |
+| X4 | Human Owns Push/PR | Push and pull request to any remote are always yours. There is no feature-branch-per-PRD convention — /commit reaches master directly, and only when every gate is green. | Critical |
 | X5 | Service Data Is Private | By convention, not infrastructure — every backend service shares one database and schema. No service reads another's tables regardless; cross-service data goes over HTTP through a published contract. Enforced at review time by R7, since nothing physical stops the violation anymore. | Critical |
 | X6 | Contracts Before Implementation | A cross-boundary type is added to shared/contracts first, then implemented against — never the reverse. Prevents duplicated types that drift silently. | High |
 
@@ -83,7 +83,7 @@ _SDLC role: Lead (review). Adversarial and read-only._
 | planner | ledger + PRD moves | read-only git | branch create only | no |
 | builder | src + tests | test / lint / typecheck | checkout only | never |
 | reviewer | nothing | read-only runs | read-only inspect | n/a |
-| `/commit` | nothing | gate suite | commit to feature branch | — |
+| `/commit` | nothing | gate suite | commit to master | — |
 | human | — | — | push / PR / merge | — |
 
 ## 7. Lite vs Full

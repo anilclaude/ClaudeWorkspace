@@ -43,7 +43,7 @@ ClaudeWorkspace/
     │                                    service or app (see below)
     │   ├── prd/{_ACTIVE,_SHIPPED}/
     │   ├── wireframes/<feature>/{index.md,*.png}
-    │   ├── task-ledger.md              ← state: what's ready/in-review/done
+    │   ├── task-ledger-<prd-slug>.md   ← state per PRD: what's ready/in-review/done
     │   └── build-trace.md              ← timing: append-only, id+title+step+timestamp
     │
     ├── backend/                       ← everything backend-related

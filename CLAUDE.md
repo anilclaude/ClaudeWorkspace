@@ -58,9 +58,9 @@ PRD → /plan → /build (implement → review → rework) → /commit → /wrap
 
 | Command | Does |
 |---|---|
-| `/plan` | PRD + wireframes → ordered, AC-bound tasks + feature branch |
+| `/plan` | PRD + wireframes → ordered, AC-bound tasks in `platform/docs/task-ledger-<prd-slug>.md` |
 | `/build` | Implement one task with tests, review it, rework until clear |
-| `/commit` | Commit to the feature branch — only when every gate is green |
+| `/commit` | Commit to `master` — only when every gate is green |
 | `/wrap` | Refresh `STATE.md`, ship finished PRDs, record decisions |
 
 Three agents: **planner** (plans), **builder** (writes), **reviewer** (clears).
@@ -86,7 +86,10 @@ section for why it's a separate gate rather than folded into `test`.
 1. **Separation of powers** — the agent that writes code never clears it.
 2. **BLOCKER is non-waivable** — no override, no deferral, by anyone.
 3. **Rework cap of 3** — then stop and escalate with both positions stated.
-4. **Human owns the default branch** — push, PR, and merge are always yours.
+4. **Human owns push and PR to any remote.** Local merges to the default branch
+   are fine — there is no feature-branch-per-PRD convention; everything builds
+   directly on `master` (single local machine, no remote, no collaborators —
+   the isolation a feature branch buys doesn't apply here).
 5. **Service data is private — by convention, not infrastructure.** Every
    backend service shares one database and schema, so nothing physically stops
    a service from querying another's tables. It still must not: cross-service

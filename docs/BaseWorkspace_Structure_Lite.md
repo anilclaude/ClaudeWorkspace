@@ -71,7 +71,7 @@ ClaudeWorkspace/
     │                            module-wise, not scoped to one service or app
     │   ├── prd/{_ACTIVE,_SHIPPED}/
     │   ├── wireframes/<feature>/{index.md,*.png}
-    │   └── task-ledger.md
+    │   └── task-ledger-<prd-slug>.md
     ├── backend/               ← everything backend-related
     │   ├── auth/              app · NestJS · :4001
     │   │   └── src/{config,common,db,modules/<module>/}
