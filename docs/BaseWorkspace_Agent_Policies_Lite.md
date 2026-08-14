@@ -7,13 +7,13 @@ The reduced policy set for single-app projects built from a PRD and wireframes, 
 What survives is the correctness machinery, and it is small: build what the AC says, test it for real, never let the writer clear their own work, never destroy the git tree, never leak secrets.
 
 - 3 agents — planner, builder, reviewer
-- 21 agent policies + 6 cross-cutting = 27 total
+- 22 agent policies + 6 cross-cutting = 28 total
 - 4 commands — `/plan`, `/build`, `/commit`, `/wrap`
 - Prerequisites and structure: see `BaseWorkspace_Structure_Lite`
 
-_Supersedes Lite v1: B7 now requires actually reading the wireframe image before writing code (not just citing it), builds from `@app/ui`’s shared components, and the reviewer gets a matching check (R6) plus `/build` gained a screenshot-comparison step. Cross-cutting gained X5/X6 — service-data privacy and contracts-before-implementation — which were already live in `CLAUDE.md`’s non-negotiables but had never been added here. Backend services then moved to one shared database and schema (`platform_db`) instead of one database per service — X5’s guarantee stopped being physical, so the new R7 makes it a review-time BLOCKER instead. The planner then gained P6 — a narrow, opt-in exception to P4’s one-task-per-AC default, for genuinely small/adjacent/low-risk ACs, to cut down on fixed per-task overhead (context read, policy read, gate run, live-verification restart) that’s paid once per task regardless of how small the change is._
+_Supersedes Lite v1: B7 now requires actually reading the wireframe image before writing code (not just citing it), builds from `@app/ui`’s shared components, and the reviewer gets a matching check (R6) plus `/build` gained a screenshot-comparison step. Cross-cutting gained X5/X6 — service-data privacy and contracts-before-implementation — which were already live in `CLAUDE.md`’s non-negotiables but had never been added here. Backend services then moved to one shared database and schema (`platform_db`) instead of one database per service — X5’s guarantee stopped being physical, so the new R7 makes it a review-time BLOCKER instead. The planner then gained P6 — a narrow, opt-in exception to P4’s one-task-per-AC default, for genuinely small/adjacent/low-risk ACs, to cut down on fixed per-task overhead (context read, policy read, gate run, live-verification restart) that’s paid once per task regardless of how small the change is. The planner then gained P7 — a CR gate for `platform/docs/prd/_CHANGE_REQUESTS/`, mirroring P1’s numbered/testable bar but without Risks/Assumptions/Dependencies, with an explicit escalation path back to a full PRD when a change turns out not to be small._
 
-## 1. Planner — 6 policies
+## 1. Planner — 7 policies
 
 _SDLC role: Lead / Architect. Turns a PRD and its wireframes into ordered, AC-bound tasks._
 
@@ -25,6 +25,7 @@ _SDLC role: Lead / Architect. Turns a PRD and its wireframes into ordered, AC-bo
 | P4 | Task Sizing | One task is reviewable in one sitting. Split anything larger. Prefer one task per AC; combine only when two ACs are genuinely inseparable, and say so. | Medium |
 | P5 | Clean Tree Gate | Verify a clean working tree on master before writing anything, and halt if dirty. No branch is created — planning and building both happen directly on master (single local machine, no remote). Never commit, push, merge, or rebase. | High |
 | P6 | Adjacent AC Grouping | Bind 2-3 ACs to one task only when all of: same file/module region, each AC individually small/polish-level (not a new endpoint, entity, migration, or security/data-integrity work), neither AC is B8 HOLD-risk. Say why in the ledger note. Narrower than "combine when convenient" — most ACs still get their own task; P4’s reviewable-in-one-sitting ceiling still caps group size. | Medium |
+| P7 | CR Gate | Applies only to `platform/docs/prd/_CHANGE_REQUESTS/`. Lighter than P1-P3: needs only What's-changing, a verified `Amends` citation (or "net-new"), and numbered/testable ACs — no Risks/Assumptions/Dependencies. If the change needs more than that, stop before writing a ledger, log a HOLD, set `Status: escalated`, and leave the file in place — promotion to a full PRD in `_ACTIVE/` is a human call. | High |
 
 ## 2. Builder — 8 policies
 
@@ -33,9 +34,9 @@ _SDLC role: Developer. The only agent that writes application code._
 | # | Policy | Description | Severity |
 |---|---|---|---|
 | B1 | Build Exactly the AC | Implement the bound acceptance criteria — nothing speculative added, nothing required left out. An unrequested refactor is scope creep and makes the diff unreviewable. | High |
-| B2 | Test Per AC | At least one test per bound AC, written alongside the implementation rather than after the reviewer asks. Each test names the AC it exercises. | Critical |
+| B2 | Test Per AC | At least one test per bound AC, written alongside the implementation rather than after the reviewer asks. Each test names the AC it exercises. New input-validation or guard logic gets both an accept and a reject assertion in the same pass — a reject-only test leaves acceptance unproven and routinely surfaces as a review finding one cycle later. | Critical |
 | B3 | No Test Suppression | Never delete, skip, disable, or weaken a test to make a run pass, and never edit an assertion to match whatever the code produced. If a test fails, decide whether the code or the test is wrong — and say which. | Critical |
-| B4 | Git Discipline | Halt on a dirty tree. Check out only the branch the planner created; halt if it is missing. Never run commit, push, merge, rebase, reset, or checkout -b. Read-only git is fine for orientation. | Critical |
+| B4 | Git Discipline | Halt on a dirty tree. Work directly on master — no feature-branch-per-PRD convention, no branch to check out. Never run commit, push, merge, rebase, reset, or checkout -b. Read-only git is fine for orientation. | Critical |
 | B5 | No Secrets | Nothing hardcoded, nothing secret logged, no raw entity returned in a response where it could leak a password hash or token. Use .env and keep .env.example current. | Critical |
 | B6 | Stack Conformance | Use only the libraries and versions in tech-stack.md. Adding or swapping a dependency is a decision to log and surface, not a choice to make mid-task. | High |
 | B7 | Wireframe Fidelity | Read the wireframe PNG(s) the task cites before writing any component code — citing the filename is not the same as looking at it. UI matches what’s drawn — layout, hierarchy, and content. Implement loading, empty, and error states even when only the happy path is drawn; log the defaults chosen. Build from @app/ui’s shared components (Button, Field, Badge, Card) rather than improvising raw markup per screen. A screen with no empty state is not done. | High |
@@ -80,8 +81,8 @@ _SDLC role: Lead (review). Adversarial and read-only._
 
 | Actor | Writes | Bash | Git | Clears own work |
 |---|---|---|---|---|
-| planner | ledger + PRD moves | read-only git | branch create only | no |
-| builder | src + tests | test / lint / typecheck | checkout only | never |
+| planner | ledger + PRD moves | read-only git | read-only (no branch) | no |
+| builder | src + tests | test / lint / typecheck | read-only (no branch) | never |
 | reviewer | nothing | read-only runs | read-only inspect | n/a |
 | `/commit` | nothing | gate suite | commit to master | — |
 | human | — | — | push / PR / merge | — |
@@ -91,7 +92,7 @@ _SDLC role: Lead (review). Adversarial and read-only._
 | Element | Lite | Full | Why the difference |
 |---|---|---|---|
 | Agents | 3 | 6 | Auditor, Estimator, Decision-Resolver have no job without profiles, capacity planning, or a routing table |
-| Agent policies | 20 | 86 | 9 profile-gated are inert; 3 stack policies collapse to 1; ~55 are elaborations of ~15 real rules |
+| Agent policies | 22 | 86 | 9 profile-gated are inert; 3 stack policies collapse to 1; ~55 are elaborations of ~15 real rules |
 | Cross-cutting | 6 | 10 | The other 4 protect multi-app, multi-developer concerns |
 | Commands | 4 | 18 | signoff, accept, defect, status, velocity, roadmap, review-batch, audit all presuppose scale |
 | Pipeline stages | 6 | 15 | Sign-off, design, specialist pass, and acceptance are ceremony at this size |

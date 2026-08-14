@@ -41,9 +41,9 @@ ClaudeWorkspace/
     ├── docs/                          ← PRDs, wireframes, task ledger —
     │                                    module-wise, not scoped to one
     │                                    service or app (see below)
-    │   ├── prd/{_ACTIVE,_SHIPPED}/
+    │   ├── prd/{_ACTIVE,_SHIPPED,_CHANGE_REQUESTS}/
     │   ├── wireframes/<feature>/{index.md,*.png}
-    │   ├── task-ledger-<prd-slug>.md   ← state per PRD: what's ready/in-review/done
+    │   ├── taskplanned/task-ledger-<prd-slug>.md  ← state per PRD: ready/in-review/done
     │   └── build-trace.md              ← timing: append-only, id+title+step+timestamp
     │
     ├── backend/                       ← everything backend-related

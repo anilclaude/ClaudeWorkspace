@@ -58,7 +58,7 @@ PRD → /plan → /build (implement → review → rework) → /commit → /wrap
 
 | Command | Does |
 |---|---|
-| `/plan` | PRD + wireframes → ordered, AC-bound tasks in `platform/docs/task-ledger-<prd-slug>.md` |
+| `/plan` | PRD + wireframes → ordered, AC-bound tasks in `platform/docs/taskplanned/task-ledger-<prd-slug>.md` |
 | `/build` | Implement one task with tests, review it, rework until clear |
 | `/commit` | Commit to `master` — only when every gate is green |
 | `/wrap` | Refresh `STATE.md`, ship finished PRDs, record decisions |

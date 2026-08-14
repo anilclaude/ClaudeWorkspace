@@ -8,7 +8,7 @@ Commits the cleared diff to `master` — there's no feature-branch-per-PRD conve
 
 ## Preconditions — all required, no override
 
-- The task's `status` is `done` in `platform/docs/task-ledger-<prd-slug>.md`
+- The task's `status` is `done` in `platform/docs/taskplanned/task-ledger-<prd-slug>.md` (a CR's `task-ledger-cr-<slug>.md` included — same pattern)
 - Zero open BLOCKERs
 - `build`, `typecheck`, `lint`, and `test` all run green **now**, not "passed earlier"
 - **`test:int` runs green now** — and actually ran. Integration tests fail loudly rather than skipping when Postgres is unreachable (`pnpm db:up` from `platform/`), so "it errored because the database was down" is a blocked commit, not a pass. A DB-backed change whose integration tests never executed is exactly what this precondition exists to stop.

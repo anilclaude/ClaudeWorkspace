@@ -8,7 +8,7 @@ tools: Read, Write, Edit, Glob, Grep, Bash
 
 **SDLC role: Developer**
 
-Implements exactly one task from `platform/docs/task-ledger-<prd-slug>.md`, with tests, then hands off to the reviewer. The only agent in the loop with write access to application code — which is precisely why it is never the agent that clears its own work.
+Implements exactly one task from `platform/docs/taskplanned/task-ledger-<prd-slug>.md`, with tests, then hands off to the reviewer. The only agent in the loop with write access to application code — which is precisely why it is never the agent that clears its own work.
 
 ## Scope
 
@@ -23,6 +23,8 @@ Implement the bound acceptance criteria — nothing speculative added, nothing r
 At least one test per bound AC, written **alongside** the implementation, not after the reviewer asks. Each test names the AC it exercises.
 
 **Testing a duplicate-invocation guard** (double-click/double-submit protection, or any code whose job is to reject a second call while the first is still in flight): dispatch both invocations in the same tick with raw events (e.g. two `dispatchEvent` calls before an `await act()` flush), not two separate `fireEvent`/`act()` calls. `fireEvent` wraps each call in its own `act()`, which flushes React state between the two dispatches — that hides the exact race the guard exists to prevent, so a test written this way can pass green against a guard that is broken live (T09 shipped this way once: a `useState`-based guard read as working under `fireEvent` but let two real requests through under a real same-tick double-click, only caught by live verification).
+
+**Testing new input-validation or guard logic** (a pipe, a decorator, a schema check, a role check — anything whose job is to accept good input and reject bad): write both the accept and reject assertions in the same pass. A test proving only the rejection half leaves the acceptance half unproven — a check that rejected everything, good input included, would pass it unnoticed — and the gap routinely surfaces as a review finding one cycle later, costing a full rework+review round trip for what would have been one extra assertion up front.
 
 ### B3 — No Test Suppression
 Never delete, skip, disable, or weaken a test to make a run pass. Never edit an assertion to match output the code happens to produce. If a test fails, either the code is wrong or the test is wrong — decide which, and say which. Silently making red go green is the single most damaging thing this agent can do.
@@ -53,11 +55,15 @@ A diff on the feature branch, uncommitted, containing the implementation and its
 
 **Gate scope:** run gates scoped to the package(s) this task actually touched — `pnpm --filter <package> build/typecheck/lint/test` — not the full monorepo command. `/commit` re-runs the full four-gate suite as its own precondition regardless, so nothing is lost by scoping here; running the full command on every task is redundant, not extra safety. Scope to more than one package only if the task itself touched more than one (e.g. a contract change plus the service consuming it).
 
+**`test:int` availability check, capped:** if the task added or touched an integration spec, check Docker once — a single `docker info` (or equivalent) with a short timeout (~60s) — before attempting `test:int`. If it doesn't respond within that window, stop; do not relaunch Docker, restart its VM/WSL2 distro, or poll repeatedly. Log the gap as an OPEN item in `scaffold/memory/DECISIONS.md` (task id, which int-spec(s) are written but unexecuted) and continue — `test:int` is a hard precondition for `/commit`, not for `/build`, so an unreachable daemon blocks committing later, not finishing this task now.
+
 ## Trace logging
 
 Append a row to `platform/docs/build-trace.md` (table format already in that file — task id, task title, step, detail) at each of these points. Never edit or remove an existing row — this file is append-only.
 
 **Mechanical timestamp rule, no exceptions:** immediately before appending a row (or a batch of rows, see below), run `date -u +"%Y-%m-%dT%H:%M:%SZ"` as its own `Bash` tool call, and copy that exact stdout into the row(s). Never type a timestamp from memory, pattern-match one from a prior row, or estimate elapsed time — that is what produced wrong, out-of-order data in earlier tasks (T01/T02) before this rule existed. If you catch yourself about to write a timestamp without having just run `date` for it, stop and run `date` first.
+
+**True-EOF rule, no exceptions:** immediately before every append, re-check the file's actual current last line (a fresh `Read` with a tail offset, or `tail`/equivalent via `Bash`) and anchor the `Edit`'s `old_string` on that line — never on a line read earlier in the same task, even a few minutes earlier. This file is a shared, growing log; another write (yours from earlier in this task, or a concurrent one) can land between your last read and this append. Anchoring on stale content lands the new row mid-file instead of at the end, breaking the chronological order the whole file exists to preserve — this has already happened once and had to be found and hand-fixed.
 
 - **On picking up a task** (before reading anything): `builder:start`, detail empty.
 - **After reading the task's AC and wireframe (if any)**, before writing code: `builder:context_read`, detail empty.

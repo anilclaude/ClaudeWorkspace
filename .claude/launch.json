@@ -6,6 +6,18 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--dir", "platform", "--filter", "@app/web", "dev"],
       "port": 3001
+    },
+    {
+      "name": "auth",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "platform", "--filter", "@app/auth-service", "dev"],
+      "port": 4001
+    },
+    {
+      "name": "cafe",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "platform", "--filter", "@app/cafe-service", "dev"],
+      "port": 4003
     }
   ]
 }

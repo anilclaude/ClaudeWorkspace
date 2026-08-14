@@ -1,14 +1,14 @@
 # Scaffolding Structure — Lite
 
-**Base Workspace — Lite** · Right-Sized Services · Prerequisites & Structure (Lite v5)
+**Base Workspace — Lite** · Right-Sized Services · Prerequisites & Structure (Lite v6)
 
 What must exist on disk, and what must be decided, before Claude can build from a PRD and wireframes. Describes the workspace as actually built and verified.
 
-- 3 agents · 27 policies · 4 commands · 6 stages
+- 3 agents · 28 policies · 4 commands · 6 stages
 - Right-sized services in a monorepo — NestJS services sharing one database and schema, one Next.js web app calling them directly (CORS-enabled, no BFF layer), shared libraries segregated by consumer
 - Not full microservices: no broker, no gateway, no service mesh
 
-_Supersedes Lite v1 (flat single-app layout), Lite v2 (services/ + web/portal, flat packages/), Lite v3 (one database per service), and Lite v4 (BFF route-handler layer in front of every service). Libraries now sit beside the side that consumes them, PRDs moved to the platform level, every backend service shares one database and schema — service data privacy is a code-review rule (R7), not an infrastructure guarantee — and the browser now calls each service directly instead of through a BFF proxy._
+_Supersedes Lite v1 (flat single-app layout), Lite v2 (services/ + web/portal, flat packages/), Lite v3 (one database per service), Lite v4 (BFF route-handler layer in front of every service), and Lite v5 (branch-per-PRD workflow, single shared task ledger). Libraries now sit beside the side that consumes them, PRDs moved to the platform level, every backend service shares one database and schema — service data privacy is a code-review rule (R7), not an infrastructure guarantee — the browser now calls each service directly instead of through a BFF proxy, everything builds directly on `master` with one task-ledger file per PRD under `taskplanned/`, and `_CHANGE_REQUESTS/` adds a lighter-weight path (P7) for small amendments to already-shipped work._
 
 ## 1. Two directories, cleanly separated
 
@@ -69,9 +69,9 @@ ClaudeWorkspace/
 └── platform/                  ═══ PRODUCT ═══
     ├── docs/                  ← PRDs, wireframes, task ledger —
     │                            module-wise, not scoped to one service or app
-    │   ├── prd/{_ACTIVE,_SHIPPED}/
+    │   ├── prd/{_ACTIVE,_SHIPPED,_CHANGE_REQUESTS}/
     │   ├── wireframes/<feature>/{index.md,*.png}
-    │   └── task-ledger-<prd-slug>.md
+    │   └── taskplanned/task-ledger-<prd-slug>.md
     ├── backend/               ← everything backend-related
     │   ├── auth/              app · NestJS · :4001
     │   │   └── src/{config,common,db,modules/<module>/}
@@ -140,7 +140,7 @@ Rework cap: 3 cycles on one task, then stop and escalate.
   ac: [AC1, AC2]
   wireframe: platform/docs/wireframes/login/login-default.png
   status: ready        # ready | in_progress | in_review | rework | done
-  branch: feature/login
+  branch: master       # no feature-branch-per-PRD convention — everything builds on master
   review_cycles: 0
   commit: null
 ```
