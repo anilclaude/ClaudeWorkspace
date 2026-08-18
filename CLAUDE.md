@@ -1,11 +1,14 @@
 # ClaudeWorkspace
 
-Two directories, cleanly separated:
+One repository, two directories with different jobs:
 
 | Directory | Holds | Changes when |
 |---|---|---|
 | [`scaffold/`](scaffold/README.md) | Process — inputs, policies, memory, templates | The *process* improves |
 | [`platform/`](platform/) | Product — backend services, frontend apps, shared libs, infra | The *product* changes |
+
+Both live in this repo's history together — `platform/` was previously its own
+nested git repo (versioned separately) but has since been merged in.
 
 **Read [`scaffold/memory/STATE.md`](scaffold/memory/STATE.md) first.** It says
 where the build is right now.
@@ -60,7 +63,7 @@ PRD → /plan → /build (implement → review → rework) → /commit → /wrap
 |---|---|
 | `/plan` | PRD + wireframes → ordered, AC-bound tasks in `platform/docs/taskplanned/task-ledger-<prd-slug>.md` |
 | `/build` | Implement one task with tests, review it, rework until clear |
-| `/commit` | Commit to `master` — only when every gate is green |
+| `/commit` | Commit to `main` — only when every gate is green |
 | `/wrap` | Refresh `STATE.md`, ship finished PRDs, record decisions |
 
 Three agents: **planner** (plans), **builder** (writes), **reviewer** (clears).
@@ -88,8 +91,9 @@ section for why it's a separate gate rather than folded into `test`.
 3. **Rework cap of 3** — then stop and escalate with both positions stated.
 4. **Human owns push and PR to any remote.** Local merges to the default branch
    are fine — there is no feature-branch-per-PRD convention; everything builds
-   directly on `master` (single local machine, no remote, no collaborators —
-   the isolation a feature branch buys doesn't apply here).
+   directly on `main`. A remote (`origin`) exists, but pushing to it and
+   opening PRs is a human action, never automatic — the isolation a
+   feature branch buys doesn't apply here regardless.
 5. **Service data is private — by convention, not infrastructure.** Every
    backend service shares one database and schema, so nothing physically stops
    a service from querying another's tables. It still must not: cross-service
