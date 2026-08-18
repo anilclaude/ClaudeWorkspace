@@ -1,0 +1,34 @@
+# Local development only — ONE Postgres instance, ONE shared database and
+# schema for every backend service. Data privacy between services is a code
+# review convention now, not an infrastructure guarantee — see
+# scaffold/policies/agent-policies.md's X5.
+name: platform
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: platform-postgres
+    restart: unless-stopped
+    environment:
+      # Bootstrap db only — the real shared database comes from the init script.
+      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-app_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app_dev_password}
+    ports:
+      # 5433, not 5432 — many machines already have a native Postgres bound to
+      # 5432, and it wins over Docker's forward for "localhost" connections,
+      # so every service silently talks to the wrong database.
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      # postgres:18+ expects the mount at /var/lib/postgresql (the parent), NOT
+      # /var/lib/postgresql/data — the image stores data in its own
+      # version-specific subdirectory now. Mounting at .../data boot-loops.
+      - ./infrastructure/docker/postgres-data:/var/lib/postgresql
+      - ./infrastructure/docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # -d is required: without it pg_isready defaults to a database named
+      # after -U, which doesn't exist — only the bootstrap "postgres" db does.
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-app_dev} -d postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 10

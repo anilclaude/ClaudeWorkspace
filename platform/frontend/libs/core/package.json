@@ -1,0 +1,28 @@
+{
+  "name": "@app/frontend-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Platform-agnostic frontend logic shared by web and mobile: API clients built on contracts, Redux slices, hooks. NO DOM, NO React Native primitives — anything that renders belongs in @app/ui (web) or @app/ui-native (mobile).",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@app/contracts": "workspace:*",
+    "@reduxjs/toolkit": "^2.12.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  }
+}

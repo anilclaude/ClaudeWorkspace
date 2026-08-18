@@ -1,0 +1,7 @@
+packages:
+  - "backend/*"
+  - "backend/libs/*"
+  - "frontend/web"
+  - "frontend/mobile"
+  - "frontend/libs/*"
+  - "shared/*"

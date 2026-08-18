@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+
+/* Tailwind v4 auto-detects content within this app's own directory, but
+   @app/ui is a separate workspace package (transpiled into the build via
+   next.config.js's transpilePackages, not copied into src/) — without this,
+   any utility class used only inside a shared component (Button, Field,
+   Card, Badge) never gets generated and that component silently renders
+   unstyled. */
+@source '../../../libs/ui/src';
